@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Pickture.Features.ImageGallery"
+             x:Class="Pickture.Features.ImageGallery.ImageGalleryPage"
+             Title="Pickture"
+             BackgroundColor="#FFFFFF">
+
+    <Grid RowDefinitions="*" ColumnDefinitions="200,*">
+
+        <!-- Left Thumbnail Panel -->
+        <Grid Grid.Row="0" Grid.Column="0" 
+              BackgroundColor="#F5F5F5" Padding="0"
+              RowDefinitions="Auto,*">
+            
+            <Label 
+                Grid.Row="0"
+                Text="Images" 
+                Padding="10" 
+                FontAttributes="Bold"
+                FontSize="14"
+                TextColor="#333333"/>
+
+            <ScrollView
+                x:Name="ThumbnailScrollView"
+                Grid.Row="1"
+                VerticalScrollBarVisibility="Always">
+                
+                <CollectionView 
+                    x:Name="ThumbnailCollectionView"
+                    ItemsSource="{Binding Images}"
+                    SelectionMode="Single"
+                    SelectionChangedCommand="{Binding SelectionChangedCommand}"
+                    SelectionChangedCommandParameter="{Binding SelectedItemParameter}"
+                    Scrolled="OnThumbnailCollectionScrolled">
+                    
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout 
+                            Orientation="Vertical" 
+                            ItemSpacing="4"/>
+                    </CollectionView.ItemsLayout>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="4" WidthRequest="190" HeightRequest="150">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer 
+                                        Tapped="OnThumbnailTapped"
+                                        CommandParameter="{Binding .}"/>
+                                </Grid.GestureRecognizers>
+
+                                <Border 
+                                    StrokeThickness="{Binding IsSelected, Converter={StaticResource SelectionWidthConverter}}"
+                                    Stroke="{Binding IsSelected, Converter={StaticResource SelectionColorConverter}}"
+                                    StrokeShape="RoundRectangle 4">
+                                    <Frame CornerRadius="4" HasShadow="True" Padding="0" Margin="0">
+                                        <local:ThumbnailItemControl ImageItem="{Binding .}"/>
+                                    </Frame>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </ScrollView>
+        </Grid>
+
+        <!-- Main Image Display Area -->
+        <Grid Grid.Row="0" Grid.Column="1" Padding="10" RowDefinitions="*,Auto">
+            
+            <!-- Image Display -->
+            <Frame 
+                Grid.Row="0"
+                CornerRadius="4" 
+                HasShadow="True" 
+                Padding="0" 
+                Margin="0"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand">
+                
+                <Image 
+                    x:Name="MainImage"
+                    Aspect="AspectFit"
+                    BackgroundColor="#E8E8E8"
+                    Source="{Binding SelectedImage.FilePath, Converter={StaticResource FullImageConverter}}"/>
+            </Frame>
+
+            <!-- Image Info Bar -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10" Padding="10">
+                
+                <Label 
+                    Grid.Column="0"
+                    Text="{Binding SelectedImage.FileName}" 
+                    FontSize="14"
+                    TextColor="#333333"
+                    VerticalOptions="Center"/>
+                    
+                    <Button 
+                        Grid.Column="1"
+                        Text="⬅ Previous" 
+                        Clicked="OnPreviousClicked"
+                        BackgroundColor="#007AFF"
+                        TextColor="White"
+                        Padding="10,8"/>
+                    
+                    <Button 
+                        Grid.Column="2"
+                        Text="⭐ Favorite" 
+                        Clicked="OnFavoriteClicked"
+                        BackgroundColor="#FF9500"
+                        TextColor="White"
+                        Padding="10,8"/>
+                    
+                    <Button 
+                        Grid.Column="3"
+                        Text="Next ➡" 
+                        Clicked="OnNextClicked"
+                        BackgroundColor="#007AFF"
+                        TextColor="White"
+                        Padding="10,8"/>
+                    
+                </Grid>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>
