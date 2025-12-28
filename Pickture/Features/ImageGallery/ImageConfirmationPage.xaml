@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Pickture.Features.ImageGallery.ImageConfirmationPage"
+             Title="Confirm Selection"
+             BackgroundColor="#FFFFFF">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" Padding="20,15" ColumnDefinitions="*,Auto" BackgroundColor="#F5F5F5">
+            <Label 
+                Grid.Column="0"
+                Text="Confirm Image Selection"
+                FontSize="18"
+                FontAttributes="Bold"
+                TextColor="#333333"
+                VerticalOptions="Center"/>
+            
+            <Button
+                Grid.Column="1"
+                Text="✕"
+                Clicked="OnCancelClicked"
+                BackgroundColor="Transparent"
+                TextColor="#666666"
+                FontSize="20"
+                Padding="10"
+                WidthRequest="40"
+                HeightRequest="40"/>
+        </Grid>
+
+        <!-- Image Display Area -->
+        <Grid Grid.Row="1" Padding="20" BackgroundColor="#FFFFFF">
+            <Frame 
+                CornerRadius="8" 
+                HasShadow="True" 
+                Padding="0" 
+                Margin="0"
+                BorderColor="#E0E0E0">
+                
+                <Grid BackgroundColor="#E8E8E8">
+                    <!-- Main Image -->
+                    <Image 
+                        x:Name="PreviewImage"
+                        Aspect="AspectFit"
+                        BackgroundColor="#E8E8E8"
+                        Source="{Binding DisplayedImage}"/>
+                    
+                    <!-- Loading Spinner -->
+                    <ActivityIndicator 
+                        IsRunning="{Binding IsImageLoading}"
+                        IsVisible="{Binding IsImageLoading}"
+                        Color="#007AFF"
+                        Scale="2"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"/>
+                </Grid>
+            </Frame>
+        </Grid>
+
+        <!-- Button Area -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="20" BackgroundColor="#F5F5F5">
+            <BoxView Grid.Column="0" BackgroundColor="Transparent"/>
+            
+            <Button
+                Grid.Column="1"
+                Text="Cancel"
+                Clicked="OnCancelClicked"
+                BackgroundColor="#E0E0E0"
+                TextColor="#333333"
+                Padding="20,12"
+                FontSize="14"
+                WidthRequest="120"/>
+            
+            <Button
+                Grid.Column="2"
+                Text="Confirm"
+                Clicked="OnConfirmClicked"
+                BackgroundColor="#007AFF"
+                TextColor="White"
+                Padding="20,12"
+                FontSize="14"
+                WidthRequest="120"/>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

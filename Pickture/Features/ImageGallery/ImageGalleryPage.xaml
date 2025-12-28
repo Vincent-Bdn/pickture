@@ -65,57 +65,59 @@
         </Grid>
 
         <!-- Image Info Bar (Top) -->
-        <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="15" Padding="10" VerticalOptions="Center">
+        <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*" ColumnSpacing="15" Padding="10" VerticalOptions="Center">
             
-            <!-- Filename on the left -->
-            <Label 
-                Grid.Column="0"
-                Text="{Binding SelectedImage.FileName}" 
-                FontSize="14"
-                TextColor="#333333"
-                VerticalOptions="Center"
-                HorizontalOptions="Start"/>
-            
-            <!-- Processing Mode Toggle Buttons in the center -->
-            <StackLayout Grid.Column="1" Orientation="Horizontal" Spacing="5" HorizontalOptions="Center">
-                <Button 
-                    Text="Original" 
-                    Clicked="OnProcessingModeClicked"
-                    CommandParameter="Original"
-                    BackgroundColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeButtonColorConverter}, ConverterParameter=Original}"
-                    TextColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeTextColorConverter}, ConverterParameter=Original}"
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="15">
+                <!-- Filename on the left -->
+                <Label 
+                    Grid.Column="0"
+                    Text="{Binding SelectedImage.FileName}" 
+                    FontSize="14"
+                    TextColor="#333333"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"/>
+                
+                <!-- Processing Mode Toggle Buttons in the center -->
+                <StackLayout Grid.Column="1" Orientation="Horizontal" Spacing="5" HorizontalOptions="Center">
+                    <Button 
+                        Text="Original" 
+                        Clicked="OnProcessingModeClicked"
+                        CommandParameter="Original"
+                        BackgroundColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeButtonColorConverter}, ConverterParameter=Original}"
+                        TextColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeTextColorConverter}, ConverterParameter=Original}"
+                        Padding="12,8"
+                        FontSize="12"/>
+                        
+                    <Button 
+                        Text="White Balance (V)" 
+                        Clicked="OnProcessingModeClicked"
+                        CommandParameter="WhiteBalanceValue"
+                        BackgroundColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeButtonColorConverter}, ConverterParameter=WhiteBalanceValue}"
+                        TextColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeTextColorConverter}, ConverterParameter=WhiteBalanceValue}"
+                        Padding="12,8"
+                        FontSize="12"/>
+                        
+                    <Button 
+                        Text="White Balance (RGB)" 
+                        Clicked="OnProcessingModeClicked"
+                        CommandParameter="WhiteBalanceRGB"
+                        BackgroundColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeButtonColorConverter}, ConverterParameter=WhiteBalanceRGB}"
+                        TextColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeTextColorConverter}, ConverterParameter=WhiteBalanceRGB}"
+                        Padding="12,8"
+                        FontSize="12"/>
+                </StackLayout>
+                
+                <!-- Add to Selection button on the right -->
+                <Button
+                    Grid.Column="2"
+                    Text="+ Add to selection"
+                    Clicked="OnAddToSelectionClicked"
+                    BackgroundColor="#007AFF"
+                    TextColor="White"
                     Padding="12,8"
-                    FontSize="12"/>
-                    
-                <Button 
-                    Text="White Balance (V)" 
-                    Clicked="OnProcessingModeClicked"
-                    CommandParameter="WhiteBalanceValue"
-                    BackgroundColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeButtonColorConverter}, ConverterParameter=WhiteBalanceValue}"
-                    TextColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeTextColorConverter}, ConverterParameter=WhiteBalanceValue}"
-                    Padding="12,8"
-                    FontSize="12"/>
-                    
-                <Button 
-                    Text="White Balance (RGB)" 
-                    Clicked="OnProcessingModeClicked"
-                    CommandParameter="WhiteBalanceRGB"
-                    BackgroundColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeButtonColorConverter}, ConverterParameter=WhiteBalanceRGB}"
-                    TextColor="{Binding ProcessingMode, Converter={StaticResource ProcessingModeTextColorConverter}, ConverterParameter=WhiteBalanceRGB}"
-                    Padding="12,8"
-                    FontSize="12"/>
-            </StackLayout>
-            
-            <!-- Select button on the right -->
-            <Button
-                Grid.Column="2"
-                Text="Select"
-                Clicked="OnSelectClicked"
-                BackgroundColor="#007AFF"
-                TextColor="White"
-                Padding="12,8"
-                FontSize="12"
-                HorizontalOptions="End"/>
+                    FontSize="12"
+                    HorizontalOptions="End"/>
+            </Grid>
         </Grid>
 
         <!-- Main Image Display Area -->

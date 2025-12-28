@@ -1,6 +1,7 @@
 using Pickture.Shared.Models;
 using Pickture.Shared.Services;
 using Pickture.Features.FolderSelection;
+using Microsoft.Maui.Graphics;
 
 #if WINDOWS
 using Windows.System;
@@ -156,15 +157,16 @@ public partial class ImageGalleryPage : ContentPage, IFileMenuHandler
         }
     }
 
-    private async void OnSelectClicked(object sender, EventArgs e)
+    private async void OnAddToSelectionClicked(object sender, EventArgs e)
     {
         try
         {
-            await _viewModel.SaveSelectedImageAsync();
+            var confirmationPage = new ImageConfirmationPage(_viewModel);
+            await Navigation.PushModalAsync(confirmationPage);
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Failed to save image: {ex.Message}", "OK");
+            await DisplayAlert("Error", $"Failed to open confirmation: {ex.Message}", "OK");
         }
     }
 }
