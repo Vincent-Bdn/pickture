@@ -15,6 +15,9 @@
             <converters:FullImageConverter x:Key="FullImageConverter" />
             <converters:SelectionColorConverter x:Key="SelectionColorConverter" />
             <converters:SelectionWidthConverter x:Key="SelectionWidthConverter" />
+            <converters:ProcessingModeButtonColorConverter x:Key="ProcessingModeButtonColorConverter" />
+            <converters:ProcessingModeTextColorConverter x:Key="ProcessingModeTextColorConverter" />
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

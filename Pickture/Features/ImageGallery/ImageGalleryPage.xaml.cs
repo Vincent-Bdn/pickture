@@ -2,12 +2,17 @@ using Pickture.Shared.Models;
 using Pickture.Shared.Services;
 using Pickture.Features.FolderSelection;
 
+#if WINDOWS
+using Windows.System;
+#endif
+
 namespace Pickture.Features.ImageGallery;
 
 public partial class ImageGalleryPage : ContentPage, IFileMenuHandler
 {
     private readonly ImageGalleryViewModel _viewModel;
     private readonly IImageService _imageService;
+    private readonly IImageProcessingService _processingService;
     private readonly string _folderPath;
 
     public ImageGalleryPage(string folderPath)
@@ -16,7 +21,8 @@ public partial class ImageGalleryPage : ContentPage, IFileMenuHandler
 
         _folderPath = folderPath;
         _imageService = new ImageService();
-        _viewModel = new ImageGalleryViewModel(_imageService);
+        _processingService = new ImageProcessingService();
+        _viewModel = new ImageGalleryViewModel(_imageService, _processingService);
         BindingContext = _viewModel;
 
         _viewModel.FolderChangeRequested += OnFolderChangeRequested;
@@ -35,6 +41,11 @@ public partial class ImageGalleryPage : ContentPage, IFileMenuHandler
 
         // Request focus for keyboard input
         this.Focus();
+    }
+
+    protected override void OnHandlerChanged()
+    {
+        base.OnHandlerChanged();
     }
 
     protected override bool OnBackButtonPressed()
@@ -132,5 +143,28 @@ public partial class ImageGalleryPage : ContentPage, IFileMenuHandler
         {
             Application.Current?.Quit();
         });
+    }
+
+    private void OnProcessingModeClicked(object sender, EventArgs e)
+    {
+        if (sender is Button button && button.CommandParameter is string modeString)
+        {
+            if (Enum.TryParse<ProcessingMode>(modeString, out var mode))
+            {
+                _viewModel.ProcessingMode = mode;
+            }
+        }
+    }
+
+    private async void OnSelectClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            await _viewModel.SaveSelectedImageAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to save image: {ex.Message}", "OK");
+        }
     }
 }
