@@ -17,6 +17,23 @@ public interface IImageProcessingService
     /// Apply GIMP's White Balance (auto white balance by stretching each channel separately)
     /// </summary>
     byte[] WhiteBalance(string filePath, double discard = 0.05);
+
+    /// <summary>
+    /// Apply custom white balance with user-defined low/high clamping and gamma on V channel.
+    /// </summary>
+    byte[] WhiteBalanceCustom(string filePath, double lowClamp, double highClamp, double gamma);
+
+    /// <summary>
+    /// Rotate an image by the specified angle and optionally crop to preserve aspect ratio.
+    /// For pure 90° rotations, set preserveAspectRatio to false to avoid cropping.
+    /// </summary>
+    byte[] RotateAndCrop(string filePath, double angleInDegrees, bool preserveAspectRatio = true);
+
+    /// <summary>
+    /// Rotate a Mat image and optionally crop to preserve aspect ratio.
+    /// For pure 90° rotations, set preserveAspectRatio to false to avoid cropping.
+    /// </summary>
+    Mat RotateAndCrop(Mat image, double angleInDegrees, bool preserveAspectRatio = true);
 }
 
 public class ImageProcessingService : IImageProcessingService
@@ -236,5 +253,218 @@ public class ImageProcessingService : IImageProcessingService
         }
         
         channel.ConvertTo(channel, MatType.CV_8U, 255.0); // Convert back to [0, 255]
+    }
+
+    /// <summary>
+    /// Apply custom white balance with user-defined low/high clamping and gamma on V channel.
+    /// </summary>
+    public byte[] WhiteBalanceCustom(string filePath, double lowClamp, double highClamp, double gamma)
+    {
+        try
+        {
+            // Load image
+            using var image = Cv2.ImRead(filePath, ImreadModes.Color);
+            if (image.Empty())
+                return null!;
+
+            // Convert BGR to HSV
+            using var hsvImage = new Mat();
+            Cv2.CvtColor(image, hsvImage, ColorConversionCodes.BGR2HSV);
+
+            // Split HSV channels
+            var channels = hsvImage.Split();
+            var vChannel = channels[2]; // V channel is at index 2
+
+            try
+            {
+                // Apply custom levels to V channel
+                // Clamp values: map [lowClamp, highClamp] to [0, 255]
+                // Then apply gamma correction
+                vChannel.ConvertTo(vChannel, MatType.CV_32F);
+
+                for (int y = 0; y < vChannel.Rows; y++)
+                {
+                    for (int x = 0; x < vChannel.Cols; x++)
+                    {
+                        float value = vChannel.Get<float>(y, x);
+
+                        // Clamp to [lowClamp, highClamp] range
+                        value = (float)Math.Max(lowClamp, Math.Min(highClamp, value));
+
+                        // Normalize to [0, 1]
+                        float normalized = (value - (float)lowClamp) / ((float)highClamp - (float)lowClamp);
+
+                        // Apply gamma correction
+                        float gammaCorrect = (float)Math.Pow(normalized, 1.0 / gamma);
+
+                        // Map back to [0, 255]
+                        vChannel.Set<float>(y, x, gammaCorrect * 255.0f);
+                    }
+                }
+
+                vChannel.ConvertTo(vChannel, MatType.CV_8U);
+
+                // Merge channels back
+                Cv2.Merge(channels, hsvImage);
+
+                // Convert back to BGR
+                using var resultBGR = new Mat();
+                Cv2.CvtColor(hsvImage, resultBGR, ColorConversionCodes.HSV2BGR);
+
+                // Encode to PNG
+                return resultBGR.ImEncode(".png");
+            }
+            finally
+            {
+                foreach (var channel in channels)
+                {
+                    channel.Dispose();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error in WhiteBalanceCustom: {ex.Message}");
+            return null!;
+        }
+    }
+
+    /// <summary>
+    /// Rotate an image by the specified angle and auto-crop to remove empty borders.
+    /// </summary>
+    public byte[] RotateAndCrop(string filePath, double angleInDegrees, bool preserveAspectRatio = true)
+    {
+        try
+        {
+            using var image = Cv2.ImRead(filePath, ImreadModes.Color);
+            if (image.Empty())
+                return null!;
+
+            var rotated = RotateAndCrop(image, angleInDegrees, preserveAspectRatio);
+            if (rotated == null)
+                return null!;
+
+            using var mem = new MemoryStream();
+            Cv2.ImEncode(".png", rotated, out var data);
+            rotated.Dispose();
+            return data;
+        }
+        catch (Exception)
+        {
+            return null!;
+        }
+    }
+
+    /// <summary>
+    /// Rotate a Mat image and optionally crop to preserve original aspect ratio.
+    /// For pure 90° rotations, set preserveAspectRatio to false to avoid cropping.
+    /// </summary>
+    public Mat RotateAndCrop(Mat image, double angleInDegrees, bool preserveAspectRatio = true)
+    {
+        if (image.Empty() || angleInDegrees == 0)
+            return image.Clone();
+
+        int height = image.Rows;
+        int width = image.Cols;
+
+        // Get rotation matrix (rotating around center, negate angle for correct direction)
+        var center = new Point2f(width / 2.0f, height / 2.0f);
+        var rotationMatrix = Cv2.GetRotationMatrix2D(center, -angleInDegrees, 1.0);
+
+        // Calculate the bounding box after rotation
+        double angleRad = angleInDegrees * Math.PI / 180.0;
+        double cosA = Math.Abs(Math.Cos(angleRad));
+        double sinA = Math.Abs(Math.Sin(angleRad));
+
+        int newWidth = (int)Math.Round(width * cosA + height * sinA);
+        int newHeight = (int)Math.Round(width * sinA + height * cosA);
+
+        // Adjust rotation matrix for the new image size
+        rotationMatrix.At<double>(0, 2) += (newWidth - width) / 2.0;
+        rotationMatrix.At<double>(1, 2) += (newHeight - height) / 2.0;
+
+        // Apply rotation with white background
+        using var rotated = new Mat();
+        Cv2.WarpAffine(image, rotated, rotationMatrix, new OpenCvSharp.Size(newWidth, newHeight), 
+            InterpolationFlags.Linear, BorderTypes.Constant, new Scalar(255, 255, 255));
+
+        rotationMatrix.Dispose();
+
+        // Only crop if preserving aspect ratio (for fine-tune rotations)
+        if (preserveAspectRatio)
+        {
+            var cropped = CropToOriginalAspectRatio(rotated, width, height, angleInDegrees);
+            return cropped;
+        }
+        else
+        {
+            // For pure 90° rotations, return the rotated image without cropping
+            return rotated.Clone();
+        }
+    }
+
+    /// <summary>
+    /// Crop the rotated image to the largest rectangle that fits within it, preserving the original aspect ratio.
+    /// </summary>
+    private Mat CropToOriginalAspectRatio(Mat rotatedImage, int originalWidth, int originalHeight, double angleInDegrees)
+    {
+        if (rotatedImage.Empty())
+            return rotatedImage.Clone();
+
+        double angleRad = angleInDegrees * Math.PI / 180.0;
+        double cosA = Math.Abs(Math.Cos(angleRad));
+        double sinA = Math.Abs(Math.Sin(angleRad));
+
+        // Find the largest axis-aligned rectangle with the same aspect ratio as the original
+        // that fits inside the rotated image bounds.
+        // 
+        // The rotated image bounds are:
+        //   rotated_width = W*|cos(θ)| + H*|sin(θ)|
+        //   rotated_height = W*|sin(θ)| + H*|cos(θ)|
+        //
+        // We need to find scaling factor s such that:
+        //   s <= |cos(θ)| + (1/r)*|sin(θ)|
+        //   s <= r*|sin(θ)| + |cos(θ)|
+        // where r = W/H is the original aspect ratio.
+
+        double r = (double)originalWidth / originalHeight;
+        
+        // Calculate the two constraints on the scaling factor
+        // s must satisfy: s <= |cos(θ)| + (1/r)|sin(θ)| AND s <= r|sin(θ)| + |cos(θ)|
+        // To find the maximum s, we take the minimum of the right-hand sides
+        // But since we're fitting a smaller rectangle inside the rotated bounds,
+        // we need the reciprocal: s = 1 / max(constraint1, constraint2)
+        double constraint1 = cosA + (1.0 / r) * sinA;
+        double constraint2 = r * sinA + cosA;
+        
+        // The scaling factor is the reciprocal of the maximum constraint
+        double s = 1.0 / Math.Max(constraint1, constraint2);
+        
+        // Calculate the crop dimensions
+        double cropW = s * originalWidth;
+        double cropH = s * originalHeight;
+
+        // Get the rotated image dimensions for centering
+        double rotatedW = rotatedImage.Cols;
+        double rotatedH = rotatedImage.Rows;
+
+        // Center the crop rectangle
+        int x = (int)((rotatedW - cropW) / 2.0);
+        int y = (int)((rotatedH - cropH) / 2.0);
+        int w = (int)cropW;
+        int h = (int)cropH;
+
+        // Ensure valid rectangle
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x + w > rotatedImage.Cols) w = rotatedImage.Cols - x;
+        if (y + h > rotatedImage.Rows) h = rotatedImage.Rows - y;
+
+        if (w <= 0 || h <= 0)
+            return rotatedImage.Clone();
+
+        var rect = new OpenCvSharp.Rect(x, y, w, h);
+        using var roi = new Mat(rotatedImage, rect);
+        return roi.Clone();
     }
 }

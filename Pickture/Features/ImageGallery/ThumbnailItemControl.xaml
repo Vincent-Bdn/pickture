@@ -6,13 +6,26 @@
     
     <VerticalStackLayout Padding="4" Spacing="2">
         
-        <Frame CornerRadius="4" HasShadow="False" Padding="0" Margin="0">
-            <local:AsyncThumbnailImage 
-                x:Name="ThumbnailImage"
-                Aspect="AspectFill"
-                BackgroundColor="#E8E8E8"
-                FilePath="{Binding FilePath}"/>
-        </Frame>
+        <Grid RowDefinitions="*" ColumnDefinitions="*" Margin="0">
+            <Frame CornerRadius="4" HasShadow="False" Padding="0" Margin="0" Grid.Row="0" Grid.Column="0">
+                <local:AsyncThumbnailImage 
+                    x:Name="ThumbnailImage"
+                    Aspect="AspectFill"
+                    BackgroundColor="#E8E8E8"
+                    FilePath="{Binding FilePath}"/>
+            </Frame>
+            
+            <!-- Star icon overlay for favorites -->
+            <Label 
+                Grid.Row="0" 
+                Grid.Column="0"
+                FontSize="16"
+                Text="⭐"
+                Padding="4"
+                HorizontalTextAlignment="End"
+                VerticalTextAlignment="Start"
+                IsVisible="{Binding IsFavorite}" />
+        </Grid>
         
         <Label 
             x:Name="FileName"

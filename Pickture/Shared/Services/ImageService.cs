@@ -1,8 +1,5 @@
 using MetadataExtractor;
-using SkiaSharp;
 using Pickture.Shared.Models;
-using Pickture.Shared.Constants;
-using System.IO;
 using Directory = System.IO.Directory;
 
 namespace Pickture.Shared.Services;
@@ -11,7 +8,6 @@ public interface IImageService
 {
     Task<ImageItem?> LoadImageAsync(string filePath);
     Task<List<ImageItem>> ScanFolderAsync(string folderPath, CancellationToken cancellationToken = default);
-    byte[]? ExtractExifThumbnail(string filePath);
 }
 
 public class ImageService : IImageService
@@ -73,31 +69,5 @@ public class ImageService : IImageService
         }
 
         return result;
-    }
-
-    public byte[]? ExtractExifThumbnail(string filePath)
-    {
-        try
-        {
-            // Attempt to extract EXIF thumbnail
-            // This is a simplified approach - actual EXIF extraction depends on file format
-            // For now, we'll attempt with JPEG files
-            if (!filePath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) && 
-                !filePath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
-                return null;
-
-            var directories = ImageMetadataReader.ReadMetadata(filePath);
-            var exifDir = directories.FirstOrDefault();
-
-            // Check if we can extract thumbnail data
-            // This would require checking the actual EXIF structure
-            // For now, return null to fall back to generation
-            return null;
-        }
-        catch
-        {
-            // Fall through to generation
-            return null;
-        }
     }
 }

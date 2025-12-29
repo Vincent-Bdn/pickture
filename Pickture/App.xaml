@@ -17,6 +17,9 @@
             <converters:SelectionWidthConverter x:Key="SelectionWidthConverter" />
             <converters:ProcessingModeButtonColorConverter x:Key="ProcessingModeButtonColorConverter" />
             <converters:ProcessingModeTextColorConverter x:Key="ProcessingModeTextColorConverter" />
+            <converters:VisualEffectButtonColorConverter x:Key="VisualEffectButtonColorConverter" />
+            <converters:VisualEffectTextColorConverter x:Key="VisualEffectTextColorConverter" />
+            <converters:CustomEffectVisibleConverter x:Key="CustomEffectVisibleConverter" />
             <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
         </ResourceDictionary>
     </Application.Resources>

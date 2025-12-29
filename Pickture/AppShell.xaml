@@ -7,19 +7,6 @@
     Title="Pickture"
     FlyoutBehavior="Disabled">
 
-    <!-- Shell Toolbar -->
-    <Shell.TitleView>
-        <HorizontalStackLayout Padding="10" Spacing="0">
-            <Button 
-                x:Name="MenuButton"
-                Text="File" 
-                BackgroundColor="Transparent"
-                TextColor="#ffff"
-                Clicked="OnMenuClicked"
-                Padding="15,10"/>
-        </HorizontalStackLayout>
-    </Shell.TitleView>
-
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"

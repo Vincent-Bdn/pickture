@@ -6,37 +6,6 @@ public partial class AppShell : Shell
 	{
 		InitializeComponent();
 	}
-
-	private void OnMenuClicked(object sender, EventArgs e)
-	{
-		MainThread.BeginInvokeOnMainThread(async () =>
-		{
-			var action = await DisplayActionSheet(
-				"File Menu",
-				"Cancel",
-				null,
-				"Change Folder",
-				"Exit Pickture");
-
-			switch (action)
-			{
-				case "Change Folder":
-					// Send event to current content
-					if (Current?.CurrentPage is IFileMenuHandler handler)
-					{
-						handler.OnChangeFolder();
-					}
-					break;
-				case "Exit Pickture":
-					// Send event to current content
-					if (Current?.CurrentPage is IFileMenuHandler handler2)
-					{
-						handler2.OnExit();
-					}
-					break;
-			}
-		});
-	}
 }
 
 /// <summary>
