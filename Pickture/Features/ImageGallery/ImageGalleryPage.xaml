@@ -131,6 +131,7 @@
                         Scale="2"
                         HorizontalOptions="Center"
                         VerticalOptions="Center"/>
+                        
                 </Grid>
             </Frame>
         </Grid>
