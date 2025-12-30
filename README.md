@@ -1,4 +1,4 @@
-# Pickture
+![Pickture](images/pickture.png)
 
 A lightweight desktop tool for quickly browsing, selecting, and applying visual effects to your photos. Pickture streamlines the photo curation workflow by combining image viewing, selection, and basic visual enhancements in one intuitive interface.
 
@@ -50,3 +50,10 @@ Your Photos/
 4. Apply effects as needed and save your selections
 
 Enjoy curating your photo collection!
+
+## Run the project
+
+```powershell
+> cd Pickture
+> dotnet run -f net9.0-windows10.0.19041.0
+```

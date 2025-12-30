@@ -741,6 +741,9 @@ public class ImageGalleryViewModel : INotifyPropertyChanged
                         await File.WriteAllBytesAsync(outputPath, rotatedData);
                         System.Diagnostics.Debug.WriteLine($"Image saved to: {outputPath}");
 
+                        // Preserve original image metadata (date taken, EXIF, etc.)
+                        await PreserveImageMetadataAsync(originalPath, outputPath);
+
                         // Mark the currently selected image as favorite
                         if (SelectedImage != null)
                         {
@@ -761,4 +764,25 @@ public class ImageGalleryViewModel : INotifyPropertyChanged
             throw;
         }
     }
-}
+
+    /// <summary>
+    /// Preserve original image metadata (creation date, EXIF) when saving processed image
+    /// This ensures Google Photos and other services use the original photo date, not the processing date
+    /// </summary>
+    private async Task PreserveImageMetadataAsync(string originalPath, string outputPath)
+    {
+        try
+        {
+            // Copy file creation/modification dates from original to output
+            var originalFileInfo = new FileInfo(originalPath);
+            File.SetCreationTime(outputPath, originalFileInfo.CreationTime);
+            File.SetLastWriteTime(outputPath, originalFileInfo.LastWriteTime);
+
+            System.Diagnostics.Debug.WriteLine($"Metadata preserved: {originalFileInfo.LastWriteTime}");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Warning: Could not preserve metadata: {ex.Message}");
+            // Don't throw - this is a non-critical operation
+        }
+    }}
