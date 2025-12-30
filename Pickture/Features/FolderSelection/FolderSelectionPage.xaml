@@ -6,23 +6,23 @@
              BackgroundColor="#F5F5F5">
 
     <VerticalStackLayout 
-        Padding="40" 
-        Spacing="30"
+        Padding="0" 
+        Spacing="0"
         VerticalOptions="Center"
         HorizontalOptions="Center">
 
-        <Label 
-            Text="Welcome to Pickture" 
-            FontSize="32"
-            FontAttributes="Bold"
-            TextColor="#333333"
-            HorizontalTextAlignment="Center"/>
+        <Image 
+            Source="pickture.png"
+            WidthRequest="400"
+            HeightRequest="400"
+            Aspect="AspectFit"
+            HorizontalOptions="Center"/>
 
-        <Label 
+        <!-- <Label 
             Text="A lightweight image viewer for photographers" 
             FontSize="16"
             TextColor="#666666"
-            HorizontalTextAlignment="Center"/>
+            HorizontalTextAlignment="Center"/> -->
 
         <Button 
             x:Name="LoadFolderButton"
